@@ -1,0 +1,82 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="Paths.props" />
+	
+	<PropertyGroup>
+		<AssemblyName>Mod</AssemblyName>
+		<Description>Description</Description>
+		<Version>1.0.0</Version>
+
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<LangVersion>14</LangVersion>
+		<DebugType>embedded</DebugType>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<NoWarn>IDE0130, IDE0251, IDE0062</NoWarn>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+		<!-- Resources so nuget can fucking find BepInEx and Unity. -->
+		<RestoreAdditionalProjectSources>
+			https://api.nuget.org/v3/index.json;
+			https://nuget.bepinex.dev/v3/index.json;
+			https://nuget.samboy.dev/v3/index.json
+		</RestoreAdditionalProjectSources>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Nuget Packages -->
+		<PackageReference Include="BepInEx.Core" Version="5.4.21" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="UnityEngine.Modules" Version="2022.3.29" IncludeAssets="compile" />
+
+      <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+
+		<!-- Assemblies via Managed -->
+		<Reference Include="BepInEx">
+			<HintPath>$(CorePath)\BepInEx.dll</HintPath>
+		</Reference>
+		<Reference Include="Harmony">
+			<HintPath>$(CorePath)\0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="Assembly-CSharp :3">
+			<HintPath>$(ManagedPath)\Assembly-CSharp.dll</HintPath>
+            <Private>false</Private>
+            <CopyLocal>false</CopyLocal>
+		</Reference>
+		<Reference Include="Plog meow">
+			<HintPath>$(ManagedPath)\plog.dll</HintPath>
+		</Reference>
+		<Reference Include="LMAO WHY WAS THIS CALLED ASSEMBLY CSHARP">
+			<HintPath>$(ManagedPath)\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI rawr">
+			<HintPath>$(ManagedPath)\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="Facepunch.Steamworks.Win64 &gt;3">
+			<HintPath>$(ManagedPath)\Facepunch.Steamworks.Win64.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.Addressables UwU">
+			<HintPath>$(ManagedPath)\Unity.Addressables.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.ResourceManager OwO">
+			<HintPath>$(ManagedPath)\Unity.ResourceManager.dll</HintPath>
+		</Reference>
+
+      <Publicize Include="Assembly-CSharp" />
+	</ItemGroup>
+
+	<Target Name="PreBuild" BeforeTargets="Build">
+		<!-- Log an error if the ULTRAKILLPath isn't set as it's nessecary for building the mod. -->
+		<Error Condition="!Exists($(ULTRAKILLPath))" Text="ULTRAKILLPath not set, open the Paths.props file and set ULTRAKILLPath to where ever your ULTRAKILL install is located on your computer." />
+	</Target>
+	
+	<Target Name="PostBuild" AfterTargets="Build">
+		<!-- Log a Warning if the PluginPath doesn't exist as it's used for knowing where to copy the DLL. -->
+		<Warning Condition="!Exists($(PluginPath))" Text="PluginPath not set, open the Paths.props file and set it to where your BepInEx plugins folder is." />
+
+		<!-- Copy the DLL if the PluginPath does exist. -->
+		<Message Condition="Exists($(PluginPath))" Text="Copying DLL to: $(CopyPath)..." Importance="high" />
+		<Copy Condition="Exists($(PluginPath))" SourceFiles="$(TargetPath)" DestinationFolder="$(CopyPath)" OverwriteReadOnlyFiles="true" />
+	</Target>
+</Project>
