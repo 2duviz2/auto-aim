@@ -57,13 +57,9 @@ public static class Patched
 
     const int flagsCount = 3;
 
-    static bool coinOnlyMode;
-    static bool coreEjectOnlyMode;
     static bool v;
 
     public static flags flag = flags.coinAndCore;
-
-    public static void UpdateBitFlags() => flag = (flags)(((int)flag + 1) % flagsCount);
 
     [HarmonyPatch(typeof(CameraFrustumTargeter), nameof(CameraFrustumTargeter.Update))]
     public static bool Prefix(CameraFrustumTargeter __instance)
@@ -74,12 +70,12 @@ public static class Patched
         Coin coin = target.GetComponent<Coin>();
         Grenade core = target.GetComponent<Grenade>();
 
-        if ((flag == flags.coin && !coin) || (flag == flags.core && !core))
+        if ((flag == flags.coin && !coin) || (flag == flags.core && !core) || (flag == flags.coinAndCore && !core && !coin))
         {
             ResetTarget(__instance);
-            return false;
+            return true;
         }
-        if (flag == flags.coin && coin)
+        if (coin || core)
         {
             var rb = target.GetComponent<Rigidbody>();
             if (rb.velocity == Vector3.zero)
@@ -103,8 +99,8 @@ public static class Patched
             Coin coin = target.GetComponent<Coin>();
             Grenade core = target.GetComponent<Grenade>();
 
-            if (flag == flags.coin && !coin) ResetTarget(__instance);
-            if (flag == flags.core && !core) ResetTarget(__instance);
+            if ((flag == flags.coin && !coin) || (flag == flags.core && !core) || (flag == flags.coinAndCore && !core && !coin))
+                ResetTarget(__instance);
             if (target != null)
             {
                 if (coin || core)
